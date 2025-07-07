@@ -1,5 +1,8 @@
 ﻿using InventoryService.Domain.Entities.Customers;
+using InventoryService.Domain.Entities.Products;
+using InventoryService.Domain.Entities.Sales;
 using InventoryService.Domain.Interfaces;
+using InventoryService.Infrastructure.Data.EntityConfigurations;
 using Microsoft.EntityFrameworkCore;
 
 namespace InventoryService.Infrastructure.Data;
@@ -12,6 +15,10 @@ public class InventoryDbContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         base.OnModelCreating(modelBuilder);
+
+        // Apply entity configurations
+        modelBuilder.ApplyConfiguration(new CustomerConfiguration());
+        modelBuilder.ApplyConfiguration(new ProductConfiguration());
     }
 
     public override int SaveChanges()
@@ -51,4 +58,7 @@ public class InventoryDbContext : DbContext
 
     // DbSet properties for your entities
     public DbSet<Customer> Customers { get; set; }
+    public DbSet<Product> Products { get; set; }
+    public DbSet<Sale> Sales { get; set; }
+    public DbSet<SaleDetails> SaleDetails { get; set; }
 }

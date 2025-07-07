@@ -5,7 +5,7 @@ using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
 
 namespace InventoryService.Infrastructure.Repositories;
-public class Repository<TEntity> : IRepository<TEntity> where TEntity : EntityBase
+public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity : class
 {
     private readonly InventoryDbContext _context;
     protected DbSet<TEntity> DbSet => _context.Set<TEntity>();
@@ -14,29 +14,28 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : EntityBa
         _context = context ?? throw new ArgumentNullException(nameof(context));
     }
 
-    public async Task<int> AddAsync(TEntity entity)
+    public virtual async Task AddAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         await DbSet.AddAsync(entity);
         await _context.SaveChangesAsync();
-        return entity.Id; // Assuming Id is the primary key and is set after saving
     }
 
-    public Task DeleteAsync(string id)
+    public virtual async Task DeleteAsync(string id, CancellationToken cancellationToken = default)
     {
         if (string.IsNullOrEmpty(id))
         {
             throw new ArgumentNullException(nameof(id), "Id cannot be null or empty.");
         }
-        var entity = DbSet.Find(id);
+        var entity = await DbSet.FindAsync(id);
         if (entity == null)
         {
             throw new KeyNotFoundException($"Entity with id {id} not found.");
         }
         DbSet.Remove(entity);
-        return _context.SaveChangesAsync();
+        await _context.SaveChangesAsync();
     }
 
-    public async Task<IEnumerable<TEntity>> FindAsync(Expression<Func<TEntity, bool>> predicate, string sortBy, string sortOrder, int offset, int page)
+    public virtual async Task<(IEnumerable<TEntity>, int)> FindAsync(Expression<Func<TEntity, bool>> predicate, string sortBy, string sortOrder, int offset, int page, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
         {
@@ -49,6 +48,9 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : EntityBa
                 query.OrderByDescending(e => EF.Property<object>(e, sortBy)) : 
                 query.OrderBy(e => EF.Property<object>(e, sortBy));
         }
+
+        int totalCount = await query.CountAsync();
+
         if (offset > 0)
         {
             query = query.Skip(offset);
@@ -57,25 +59,19 @@ public class Repository<TEntity> : IRepository<TEntity> where TEntity : EntityBa
         {
             query = query.Take(page);
         }
-        return await query.AsNoTracking().ToListAsync();
+        var data = await query.AsNoTracking().ToListAsync();
+        return (data, totalCount);
     }
 
-    public async Task<IEnumerable<TEntity>> GetAllAsync()
+    public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await DbSet.AsNoTracking().ToListAsync();
         return entities;
     }
 
-    public async Task<TEntity?> GetByIdAsync(string id)
-    {
-        if (string.IsNullOrEmpty(id))
-        {
-            throw new ArgumentNullException(nameof(id), "Id cannot be null or empty.");
-        }
-        return await DbSet.AsNoTracking().FirstOrDefaultAsync(e => e.Id.ToString() == id);
-    }
+    public abstract Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
 
-    public async Task UpdateAsync(TEntity entity)
+    public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (entity == null)
             throw new ArgumentNullException(nameof(entity));

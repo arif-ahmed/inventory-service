@@ -6,8 +6,8 @@ using MediatR;
 namespace InventoryService.Application.Customers;
 public class GetCustomerByIdQuery : IRequest<CustomerDto>
 {
-    public string Id { get; }
-    public GetCustomerByIdQuery(string id)
+    public int Id { get; }
+    public GetCustomerByIdQuery(int id)
     {
         Id = id;
     }

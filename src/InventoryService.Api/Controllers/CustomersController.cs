@@ -1,5 +1,6 @@
-﻿using InventoryService.Application.Customers;
-using InventoryService.Domain.Entities.Products;
+﻿using InventoryService.Api.RequestModels;
+using InventoryService.Application.Customers;
+using InventoryService.Application.Dtos;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
@@ -20,10 +21,10 @@ public class CustomersController : ControllerBase
     }
 
     [HttpGet("{id}")]
-    [SwaggerOperation(Summary = "Get a product by ID", Description = "Returns a single product.")]
-    [SwaggerResponse(200, "Product found", typeof(Product))]
-    [SwaggerResponse(404, "Product not found")]
-    public async Task<IActionResult> GetCustomerById(string id)
+    [SwaggerOperation(Summary = "Get customer by ID", Description = "Fetches a customer by their unique identifier.")]
+    [SwaggerResponse(200, "Customer found", typeof(CustomerDto))]
+    [SwaggerResponse(404, "Customer not found")]
+    public async Task<IActionResult> GetCustomerById(int id)
     {
         _logger.LogInformation("Fetching customer with ID: {CustomerId}", id);
         var customer = await _mediator.Send(new GetCustomerByIdQuery(id));
@@ -41,5 +42,29 @@ public class CustomersController : ControllerBase
         _logger.LogInformation("Fetching all customers");
         var customers = await _mediator.Send(new GetCustomersQuery());
         return Ok(customers);
+    }
+
+    [HttpPost]
+    public async Task<IActionResult> Post(CustomerCreateRequestModel payload)
+    {
+        _logger.LogInformation($"Create customer request: {payload}");
+        await _mediator.Send(new CreateCustomerCommand { FullName = payload.FullName, Email = payload.Email, Phone = payload.Phone });
+        return Ok("Customer created successfully");
+    }
+
+    [HttpPut]
+    public async Task<IActionResult> Put(int id, [FromBody] CustomerDto customer)
+    {
+        _logger.LogInformation($"Update customer request: {customer}");
+        var status = await _mediator.Send(new UpdateCustomerCommand { CustomerId = id, FullName = customer.FullName, Email = customer.Email, Phone = customer.Phone, });
+        return Ok(status);
+    }
+
+    [HttpDelete]
+    public async Task<IActionResult> Delete(int id)
+    {
+        _logger.LogInformation("Deleting customer with ID: {CustomerId}", id);
+        await _mediator.Send(new DeleteCustomerCommand { CustomerId = id });
+        return Ok();
     }
 }

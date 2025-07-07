@@ -1,20 +1,17 @@
-﻿using InventoryService.Domain.Interfaces;
+﻿using InventoryService.Domain.Entities.Sales;
+using InventoryService.Domain.Interfaces;
 
 namespace InventoryService.Domain.Entities.Customers;
-public class Customer : EntityBase, IAuditable, ISoftDeletable
+public class Customer : ISoftDeletable
 {
     public int CustomerId { get; set; }
-    public string Name { get; set; } = default!;
+    public string FullName { get; set; } = default!;
+    public string Phone { get; set; } = default!;
     public string Email { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Address { get; set; } = default!;
-    public bool IsActive { get; set; }
+    public int LoyaltyPoints { get; set; }
     public bool IsDeleted { get; set; }
-    public DateTime CreatedAt { get; set; }
-    public string? CreatedBy { get; set; }
-    public DateTime? ModifiedAt { get; set; }
-    public string? ModifiedBy { get; set; }
-    public DateTime? DeletedAt { get; set; }
-    public string? DeletedBy { get; set; }
+
+    // Navigation properties
+    public virtual ICollection<Sale> Sales { get; set; } = default!;
 }
 
