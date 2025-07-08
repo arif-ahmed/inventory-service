@@ -1,5 +1,4 @@
 ﻿using InventoryService.Api.RequestModels;
-using InventoryService.Application.Dtos;
 using InventoryService.Application.Products;
 using MediatR;
 using Microsoft.AspNetCore.Mvc;
@@ -33,10 +32,10 @@ public class ProductsController : ControllerBase
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetProducts()
+    public async Task<IActionResult> GetProducts([FromQuery] string searchText, [FromQuery] int offset = 1, [FromQuery] int page = 10)
     {
         _logger.LogInformation("Fetching list of products");
-        var products = await _mediator.Send(new GetProductsQuery());
+        var products = await _mediator.Send(new GetProductsQuery { SearchTerm = searchText, PageNumber = offset, PageSize = page });
         return Ok(products);
     }
 
