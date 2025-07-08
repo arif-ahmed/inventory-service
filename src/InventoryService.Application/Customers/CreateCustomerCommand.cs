@@ -3,33 +3,32 @@ using InventoryService.Domain.Interfaces;
 using MediatR;
 
 namespace InventoryService.Application.Customers;
-public class CreateCustomerCommand : IRequest<int>
+public class CreateCustomerCommand : IRequest
 {
-    public string Name { get; set; } = default!;
+    public string FullName { get; set; } = default!;
     public string Email { get; set; } = default!;
-    public string PhoneNumber { get; set; } = default!;
-    public string Address { get; set; } = default!;
+    public string Phone { get; set; } = default!;
+    public int LoyaltyPoints { get; set; }
 }
 
-public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand, int>
+public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerCommand>
 {
     private readonly ICustomerRepository _customerRepository;
-    //public CreateCustomerCommandHandler(ICustomerRepository customerRepository)
-    //{
-    //    _customerRepository = customerRepository;
-    //}
-    public async Task<int> Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
+    public CreateCustomerCommandHandler(ICustomerRepository customerRepository)
+    {
+        _customerRepository = customerRepository;
+    }
+    public async Task Handle(CreateCustomerCommand request, CancellationToken cancellationToken)
     {
         var customer = new Customer
         {
-            Name = request.Name,
+            FullName = request.FullName,
             Email = request.Email,
-            PhoneNumber = request.PhoneNumber,
-            Address = request.Address
+            Phone = request.Phone,
+            LoyaltyPoints = request.LoyaltyPoints,
         };
-        // await _customerRepository.AddAsync(customer);
-        // return customer.CustomerId; 
-        return await Task.FromResult(1); // Simulating async operation for example purposes
+
+        await _customerRepository.AddAsync(customer, cancellationToken);
     }
 }
 
