@@ -2,10 +2,12 @@
 using InventoryService.Api.RequestModels;
 using InventoryService.Application.Sales;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryService.Api.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class SalesController : ControllerBase

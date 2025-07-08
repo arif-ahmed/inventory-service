@@ -2,11 +2,13 @@
 using InventoryService.Application.Customers;
 using InventoryService.Application.Dtos;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryService.Api.Controllers;
 
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class CustomersController : ControllerBase
