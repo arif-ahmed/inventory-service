@@ -1,3 +1,4 @@
+using InventoryService.Api.Filters;
 using InventoryService.Application;
 using InventoryService.Application.Mapping;
 using InventoryService.Domain.Entities.Customers;
@@ -28,6 +29,10 @@ builder.Services.AddDbContext<InventoryDbContext>(options =>
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();
+builder.Services.AddScoped<ISalesRepository, SalesRepository>();
+builder.Services.AddScoped<ISaleDetailsRepository, SaleDetailsRepository>();
+
+builder.Services.AddSingleton<SalesConcurrencyFilter>();
 
 builder.Services.AddCors(options =>
 {

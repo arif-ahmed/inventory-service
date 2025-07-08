@@ -1,9 +1,8 @@
 ﻿using InventoryService.Domain.Entities.Customers;
-using InventoryService.Domain.Interfaces;
 using System.ComponentModel.DataAnnotations;
 
 namespace InventoryService.Domain.Entities.Sales;
-public class Sale : EntityBase
+public class Sale
 {
     [Key]
     public int SaleId { get; set; }
