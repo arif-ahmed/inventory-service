@@ -24,13 +24,13 @@ public class InventoryDbContext : DbContext
 
     public override int SaveChanges()
     {
-        ApplyAuditInfo();
+        // ApplyAuditInfo();
         return base.SaveChanges();
     }
 
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
     {
-        ApplyAuditInfo();
+        // ApplyAuditInfo();
         return await base.SaveChangesAsync(cancellationToken);
     }
 

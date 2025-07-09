@@ -2,8 +2,8 @@
 using InventoryService.Api.RequestModels;
 using InventoryService.Application.Sales;
 using MediatR;
-using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryService.Api.Controllers;
 
@@ -22,6 +22,13 @@ public class SalesController : ControllerBase
 
     [ServiceFilter(typeof(SalesConcurrencyFilter))]
     [HttpPost]
+    [SwaggerOperation(Summary = "Create a new sale transaction", Description = "Creates a new sale transaction with details.")]
+    [SwaggerResponse(200, "Sale transaction created successfully")]
+    [SwaggerResponse(400, "Invalid sale data")]
+    [SwaggerResponse(500, "Internal server error")]
+    [ProducesResponseType(typeof(string), 200)]
+    [ProducesResponseType(typeof(string), 400)]
+    [ProducesResponseType(typeof(string), 500)]
     public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequestModel request)
     {
         _logger.LogInformation("Creating a new sale transaction");
@@ -41,6 +48,7 @@ public class SalesController : ControllerBase
             }).ToList()
         });
 
-        return Ok();
+        _logger.LogInformation("Sale transaction created successfully");
+        return Ok("Sale transaction created successfully");
     }
 }
