@@ -21,6 +21,7 @@ using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
 using Microsoft.OpenApi.Models;
+using System;
 using System.Text;
 
 
@@ -49,8 +50,11 @@ builder.Services.AddMediatR(cfg =>
 builder.Services.AddScoped<IPasswordHasher, BCryptPasswordHasher>();
 builder.Services.AddScoped<ITokenService, TokenService>();
 
+//builder.Services.AddDbContext<InventoryDbContext>(options =>
+//    options.UseInMemoryDatabase("InventoryDb"));
+
 builder.Services.AddDbContext<InventoryDbContext>(options =>
-    options.UseInMemoryDatabase("InventoryDb"));
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddScoped<ICustomerRepository, CustomerRepository>();
 builder.Services.AddScoped<IProductRepository, ProductRepository>();

@@ -6,7 +6,7 @@ This is a backend .NET Web API for a basic Inventory System designed to manage P
 
 ---
 
-## Features ✨
+## ✨ Features 
 
 - **Product Management:** Add, update, delete, and list products 📦
 - **Customer Management:** Add, update, delete, and list customers 👥
@@ -23,7 +23,7 @@ This is a backend .NET Web API for a basic Inventory System designed to manage P
 
 ---
 
-## Setup Instructions ⚙️
+## ⚙️ Setup Instructions 
 
 ### 1. Prerequisites
 
@@ -33,14 +33,26 @@ This is a backend .NET Web API for a basic Inventory System designed to manage P
 
 ### 2. Database Setup 🛢️
 
-1. Create a new database in your preferred RDBMS.
-2. Run the SQL script provided in `/db` or `/scripts` folder (if included) to initialise the database schema.
-3. Update the connection string in `appsettings.json` to match your database credentials.
+1. Update the connection string in `appsettings.json` to match your database credentials.
 
    ```json
    "ConnectionStrings": {
      "DefaultConnection": "Server=YOUR_SERVER;Database=YOUR_DATABASE;User Id=YOUR_USER;Password=YOUR_PASSWORD;"
    }
+
+2. Run the SQL script provided in `/db` or `/scripts` folder (if included) to initialise the database schema.
+
+    ```sh
+    # Navigate to the src directory
+    cd src
+    
+    # Add initial migration
+    dotnet ef migrations add InitialCreate --project InventoryService.Infrastructure --startup-project InventoryService.Api
+    
+    # Update the database
+    dotnet ef database update --project InventoryService.Infrastructure --startup-project InventoryService.Api
+    ```
+
 
 ## 🚀 Running the Application
 

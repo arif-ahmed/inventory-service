@@ -20,6 +20,8 @@ public class InventoryDbContext : DbContext
         // Apply entity configurations
         modelBuilder.ApplyConfiguration(new CustomerConfiguration());
         modelBuilder.ApplyConfiguration(new ProductConfiguration());
+        modelBuilder.ApplyConfiguration(new SaleConfiguration());
+        modelBuilder.ApplyConfiguration(new SaleDetailsConfiguration());
     }
 
     public override int SaveChanges()
