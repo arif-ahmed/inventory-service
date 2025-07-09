@@ -1,4 +1,5 @@
-﻿using InventoryService.Domain.Interfaces;
+﻿using FluentValidation;
+using InventoryService.Domain.Interfaces;
 using MediatR;
 
 namespace InventoryService.Application.Products;
@@ -39,5 +40,18 @@ public class UpdateProductCommandHandler : IRequestHandler<UpdateProductCommand,
 
         await _productRepository.UpdateAsync(product);
         return $"Product with ID {request.ProductId} updated successfully.";
+    }
+}
+
+class UpdateProductCommandValidator : AbstractValidator<UpdateProductCommand>
+{
+    public UpdateProductCommandValidator()
+    {
+        RuleFor(x => x.ProductId).GreaterThan(0).WithMessage("Product ID must be greater than 0.");
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Product name cannot be empty.");
+        RuleFor(x => x.Barcode).NotEmpty().WithMessage("Barcode cannot be empty.");
+        RuleFor(x => x.Price).GreaterThanOrEqualTo(0).WithMessage("Price must be a non-negative value.");
+        RuleFor(x => x.StockQty).GreaterThanOrEqualTo(0).WithMessage("Stock quantity must be a non-negative value.");
+        RuleFor(x => x.Category).NotEmpty().WithMessage("Category cannot be empty.");
     }
 }
