@@ -1,4 +1,5 @@
 ﻿using InventoryService.Domain.Entities.Customers;
+using InventoryService.Domain.Entities.Identity;
 using InventoryService.Domain.Entities.Products;
 using InventoryService.Domain.Entities.Sales;
 using InventoryService.Domain.Interfaces;
@@ -61,4 +62,5 @@ public class InventoryDbContext : DbContext
     public DbSet<Product> Products { get; set; }
     public DbSet<Sale> Sales { get; set; }
     public DbSet<SaleDetails> SaleDetails { get; set; }
+    public DbSet<User> Users { get; set; } 
 }
