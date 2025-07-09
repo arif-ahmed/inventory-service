@@ -1,15 +1,22 @@
+using FluentValidation;
+using FluentValidation.AspNetCore;
 using InventoryService.Api.Filters;
 using InventoryService.Application;
+using InventoryService.Application.Common.Behaviors;
+using InventoryService.Application.Customers;
 using InventoryService.Application.Mapping;
 using InventoryService.Domain.Entities.Customers;
 using InventoryService.Domain.Entities.Identity;
 using InventoryService.Domain.Entities.Products;
 using InventoryService.Domain.Entities.Sales;
 using InventoryService.Domain.Interfaces;
+using InventoryService.Domain.Interfaces.Pricing;
 using InventoryService.Infrastructure.Common;
 using InventoryService.Infrastructure.Data;
 using InventoryService.Infrastructure.Repositories;
 using InventoryService.Infrastructure.Services;
+using InventoryService.Infrastructure.Services.Pricing;
+using MediatR;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.Tokens;
@@ -21,6 +28,15 @@ var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 builder.Services.AddControllers();
+
+builder.Services.AddFluentValidationAutoValidation();
+builder.Services.AddValidatorsFromAssemblyContaining<CreateCustomerCommandValidator>();
+
+builder.Services.AddTransient(typeof(IPipelineBehavior<,>), typeof(ValidationBehavior<,>));
+
+builder.Services.AddTransient<IDiscountPolicy, PercentageDiscountPolicy>();
+builder.Services.AddTransient<IVATPolicy, StandardVATPolicy>();
+
 builder.Services.AddAutoMapper(cfg => {
     cfg.AddProfile<MappingProfile>();
 });
