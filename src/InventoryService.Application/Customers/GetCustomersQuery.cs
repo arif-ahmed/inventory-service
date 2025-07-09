@@ -2,14 +2,8 @@
 using InventoryService.Application.Dtos;
 using InventoryService.Domain.Interfaces;
 using MediatR;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace InventoryService.Application.Customers;
-
 public class GetCustomersQuery : IRequest<IEnumerable<CustomerDto>>
 {
 }

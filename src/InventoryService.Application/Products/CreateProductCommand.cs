@@ -1,4 +1,5 @@
-﻿using InventoryService.Domain.Entities.Products;
+﻿using FluentValidation;
+using InventoryService.Domain.Entities.Products;
 using InventoryService.Domain.Interfaces;
 using MediatR;
 
@@ -10,8 +11,6 @@ public class CreateProductCommand : IRequest
     public decimal Price { get; set; }
     public decimal StockQty { get; set; }
     public string Category { get; set; } = default!;
-    // public bool Status { get; set; }
-    // public bool IsDeleted { get; set; }
 }
 
 public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
@@ -31,11 +30,20 @@ public class CreateProductCommandHandler : IRequestHandler<CreateProductCommand>
             StockQty = request.StockQty,
             Category = request.Category,
             Status = true
-            // Status = request.Status,
-            // IsDeleted = request.IsDeleted
         };
 
         await _productRepository.AddAsync(product, cancellationToken);
     }
 }
 
+public class CreateProductCommandValidator : AbstractValidator<CreateProductCommand>
+{
+    public CreateProductCommandValidator()
+    {
+        RuleFor(x => x.Name).NotEmpty().WithMessage("Product name is required.");
+        RuleFor(x => x.Barcode).NotEmpty().WithMessage("Barcode is required.");
+        RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
+        RuleFor(x => x.StockQty).GreaterThanOrEqualTo(0).WithMessage("Stock quantity cannot be negative.");
+        RuleFor(x => x.Category).NotEmpty().WithMessage("Category is required.");
+    }
+}
