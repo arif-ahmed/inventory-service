@@ -1,4 +1,5 @@
-﻿using InventoryService.Domain.Entities.Sales;
+﻿using FluentValidation;
+using InventoryService.Domain.Entities.Sales;
 using InventoryService.Domain.Interfaces;
 using InventoryService.Domain.Interfaces.Pricing;
 using MediatR;
@@ -93,5 +94,29 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
 
         // uow save changes
         await Task.Delay(3000);
+    }
+}
+
+class CreateSaleTransactionCommandValidator : AbstractValidator<CreateSaleTransactionCommand>
+{
+    public CreateSaleTransactionCommandValidator()
+    {
+        RuleFor(x => x.SaleDate).NotEmpty().WithMessage("Sale date is required.");
+        RuleFor(x => x.CustomerId).NotNull().WithMessage("Customer ID is required.");
+        RuleFor(x => x.TotalAmount).GreaterThan(0).WithMessage("Total amount must be greater than zero.");
+        RuleFor(x => x.PaidAmount).GreaterThanOrEqualTo(0).WithMessage("Paid amount cannot be negative.");
+        RuleFor(x => x.DueAmount).GreaterThanOrEqualTo(0).WithMessage("Due amount cannot be negative.");
+        RuleFor(x => x.SaleDetails).NotEmpty().WithMessage("At least one sale detail is required.");
+        RuleForEach(x => x.SaleDetails).SetValidator(new SaleDetailDtoValidator());
+    }
+}
+
+class SaleDetailDtoValidator : AbstractValidator<SaleDetailDto>
+{
+    public SaleDetailDtoValidator()
+    {
+        RuleFor(x => x.ProductId).GreaterThan(0).WithMessage("Product ID must be greater than zero.");
+        RuleFor(x => x.Quantity).GreaterThan(0).WithMessage("Quantity must be greater than zero.");
+        RuleFor(x => x.Price).GreaterThan(0).WithMessage("Price must be greater than zero.");
     }
 }

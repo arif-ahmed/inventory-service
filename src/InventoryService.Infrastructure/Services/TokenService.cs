@@ -14,7 +14,7 @@ public class TokenService : ITokenService
         _jwtSettings = jwtSettings ?? throw new ArgumentNullException(nameof(jwtSettings));
     }
 
-    public async Task<string> GenerateTokenAsync(string username, string role, int userId)
+    public async Task<string> GenerateTokenAsync()
     {
         var secretKey = _jwtSettings.SecretKey;
         var key = new SymmetricSecurityKey(Encoding.ASCII.GetBytes(secretKey));

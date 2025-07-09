@@ -38,8 +38,7 @@ public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand,
         if(!_passwordHasher.VerifyPassword(request.Password, user.PasswordHash)) 
             return new LoginResponse { IsAuthenticated = false };
 
-        // var token = await _tokenService.GenerateTokenAsync(user);
-        var token = await _tokenService.GenerateTokenAsync(string.Empty, string.Empty, 0);
+        var token = await _tokenService.GenerateTokenAsync();
         return new LoginResponse { IsAuthenticated = true, Token = token };
     }
 }

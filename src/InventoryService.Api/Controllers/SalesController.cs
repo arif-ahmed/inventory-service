@@ -1,13 +1,13 @@
 ﻿using InventoryService.Api.Filters;
-using InventoryService.Api.RequestModels;
 using InventoryService.Application.Sales;
 using MediatR;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryService.Api.Controllers;
 
-// [Authorize]
+[Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class SalesController : ControllerBase
@@ -29,25 +29,10 @@ public class SalesController : ControllerBase
     [ProducesResponseType(typeof(string), 200)]
     [ProducesResponseType(typeof(string), 400)]
     [ProducesResponseType(typeof(string), 500)]
-    public async Task<IActionResult> CreateSale([FromBody] CreateSaleRequestModel request)
+    public async Task<IActionResult> CreateSale([FromBody] CreateSaleTransactionCommand command)
     {
         _logger.LogInformation("Creating a new sale transaction");
-
-        await _mediator.Send(new CreateSaleTransactionCommand
-        {
-            SaleDate = request.SaleDate,
-            CustomerId = request.CustomerId,
-            TotalAmount = request.TotalAmount,
-            PaidAmount = request.PaidAmount,
-            DueAmount = request.DueAmount,
-            SaleDetails = request.SaleDetails.Select(sd => new Application.Sales.SaleDetailDto
-            {
-                ProductId = sd.ProductId,
-                Quantity = sd.Quantity,
-                Price = sd.Price
-            }).ToList()
-        });
-
+        await _mediator.Send(command);
         _logger.LogInformation("Sale transaction created successfully");
         return Ok("Sale transaction created successfully");
     }
