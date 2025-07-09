@@ -40,7 +40,7 @@ This is a backend .NET Web API for a basic Inventory System designed to manage P
      "DefaultConnection": "Server=YOUR_SERVER;Database=YOUR_DATABASE;User Id=YOUR_USER;Password=YOUR_PASSWORD;"
    }
 
-2. Run the SQL script provided in `/db` or `/scripts` folder (if included) to initialise the database schema.
+2. Run the SQL script provided in `/src/InventoryService.Infrastructure` folder to initialise the database schema.
 
     ```sh
     # Navigate to the src directory

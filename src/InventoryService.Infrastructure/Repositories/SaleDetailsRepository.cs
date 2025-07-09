@@ -10,9 +10,4 @@ public class SaleDetailsRepository : Repository<SaleDetails>, ISaleDetailsReposi
     public SaleDetailsRepository(InventoryDbContext context) : base(context)
     {
     }
-
-    public override Task<SaleDetails?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
 }

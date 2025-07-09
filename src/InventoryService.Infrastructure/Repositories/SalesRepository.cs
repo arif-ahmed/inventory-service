@@ -11,9 +11,4 @@ public class SalesRepository : Repository<Sale>, ISalesRepository
     {
 
     }
-
-    public override Task<Sale?> GetByIdAsync(int id, CancellationToken cancellationToken = default)
-    {
-        throw new NotImplementedException();
-    }
 }
