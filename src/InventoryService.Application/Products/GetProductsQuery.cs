@@ -23,19 +23,6 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, (IEnume
     }
     public async Task<(IEnumerable<ProductDto>, int)> Handle(GetProductsQuery request, CancellationToken cancellationToken)
     {
-        //if (!string.IsNullOrEmpty(request.SearchTerm))
-        //{
-        //    await _productRepository.FindAsync(request.PageNumber, request.PageSize, cancellationToken);
-        //}
-
-        //var result = await _productRepository.FindAsync(product => product.Name.Contains(request.SearchTerm, StringComparison.OrdinalIgnoreCase), request.PageNumber, request.PageSize, cancellationToken);
-        //if (result.Item1 == null || !result.Item1.Any())
-        //{
-        //    return (Enumerable.Empty<ProductDto>(), 0);
-        //}
-        //var productsDto = _mapper.Map<IEnumerable<ProductDto>>(result.Item1);
-        //return (productsDto, result.Item2);
-
         var query = await _productRepository.GetQueryable();
 
         if(!string.IsNullOrEmpty(request.SearchTerm))

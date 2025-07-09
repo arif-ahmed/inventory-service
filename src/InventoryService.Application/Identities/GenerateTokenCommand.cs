@@ -30,6 +30,7 @@ public class GenerateTokenCommandHandler : IRequestHandler<GenerateTokenCommand,
     public async Task<LoginResponse> Handle(GenerateTokenCommand request, CancellationToken cancellationToken)
     {
         var user = await _userRepository.GetByUsernameAsync(request.Username);
+
         if (user == null)
         {
             throw new UnauthorizedAccessException("Invalid username or password.");

@@ -1,5 +1,4 @@
-﻿using InventoryService.Domain.Entities;
-using InventoryService.Domain.Interfaces;
+﻿using InventoryService.Domain.Interfaces;
 using InventoryService.Infrastructure.Data;
 using Microsoft.EntityFrameworkCore;
 using System.Linq.Expressions;
@@ -34,36 +33,6 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
         DbSet.Remove(entity);
         await _context.SaveChangesAsync();
     }
-
-    [Obsolete("Use FindAsync with predicate instead.")]
-    public virtual async Task<(IEnumerable<TEntity>, int)> FindAsync(Expression<Func<TEntity, bool>> predicate, string sortBy, string sortOrder, int offset, int page, CancellationToken cancellationToken = default)
-    {
-        if (predicate == null)
-        {
-            throw new ArgumentNullException(nameof(predicate), "Predicate cannot be null.");
-        }
-        var query = DbSet.Where(predicate);
-        if (!string.IsNullOrEmpty(sortBy))
-        {
-            query = sortOrder.ToLower() == "desc" ? 
-                query.OrderByDescending(e => EF.Property<object>(e, sortBy)) : 
-                query.OrderBy(e => EF.Property<object>(e, sortBy));
-        }
-
-        int totalCount = await query.CountAsync();
-
-        if (offset > 0)
-        {
-            query = query.Skip(offset);
-        }
-        if (page > 0)
-        {
-            query = query.Take(page);
-        }
-        var data = await query.AsNoTracking().ToListAsync();
-        return (data, totalCount);
-    }
-
     public virtual async Task<(IEnumerable<TEntity>, int)> FindAsync(Expression<Func<TEntity, bool>> predicate, int offset, int page, CancellationToken cancellationToken = default)
     {
         if (predicate == null)
@@ -92,38 +61,15 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
         var data = await query.AsNoTracking().ToListAsync();
         return (data, totalCount);
     }
-
-    //public virtual async Task<(IQueryable<TEntity>, int)> FindAsync(int offset, int page, CancellationToken cancellationToken = default)
-    //{
-    //    if (predicate == null)
-    //    {
-    //        throw new ArgumentNullException(nameof(predicate), "Predicate cannot be null.");
-    //    }
-
-    //    var query = DbSet.Where(x => x);
-
-    //    int totalCount = await query.CountAsync();
-
-    //    if (offset > 0)
-    //    {
-    //        query = query.Skip(offset);
-    //    }
-    //    if (page > 0)
-    //    {
-    //        query = query.Take(page);
-    //    }
-    //    var data = await query.AsNoTracking().ToListAsync();
-    //    return (data, totalCount);
-    //}
-
     public virtual async Task<IEnumerable<TEntity>> GetAllAsync(CancellationToken cancellationToken = default)
     {
         var entities = await DbSet.AsNoTracking().ToListAsync();
         return entities;
     }
-
-    public abstract Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default);
-
+    public virtual async Task<TEntity?> GetByIdAsync(int id, CancellationToken cancellationToken = default) 
+    {
+        return await DbSet.FindAsync(new object[] { id }, cancellationToken);
+    }
     public virtual async Task UpdateAsync(TEntity entity, CancellationToken cancellationToken = default)
     {
         if (entity == null)
@@ -171,7 +117,6 @@ public abstract class Repository<TEntity> : IRepository<TEntity> where TEntity :
 
         await _context.SaveChangesAsync();
     }
-
     public async Task<IQueryable<TEntity>> GetQueryable()
     {
         return await Task.FromResult(DbSet.AsQueryable());
