@@ -1,4 +1,5 @@
-﻿using InventoryService.Domain.Interfaces;
+﻿using FluentValidation;
+using InventoryService.Domain.Interfaces;
 using MediatR;
 
 namespace InventoryService.Application.Customers;
@@ -41,5 +42,35 @@ public class UpdateCustomerCommandHandler : IRequestHandler<UpdateCustomerComman
 
         await _customerRepository.UpdateAsync(customer);
         return "Customer updated successfully";
+    }
+}
+
+public class UpdateCustomerCommandValidator : AbstractValidator<UpdateCustomerCommand>
+{
+    public UpdateCustomerCommandValidator()
+    {
+        RuleFor(c => c.CustomerId)
+            .GreaterThan(0)
+            .WithMessage("Customer ID must be greater than 0.");
+
+        RuleFor(c => c.FullName)
+            .NotEmpty()
+            .When(c => c.FullName != null)
+            .WithMessage("Full name is required if provided.");
+
+        RuleFor(c => c.Email)
+            .EmailAddress()
+            .When(c => !string.IsNullOrWhiteSpace(c.Email))
+            .WithMessage("A valid email is required if provided.");
+
+        RuleFor(c => c.Phone)
+            .NotEmpty()
+            .When(c => c.Phone != null)
+            .WithMessage("Phone number is required if provided.");
+
+        RuleFor(c => c.LoyaltyPoints)
+            .GreaterThanOrEqualTo(0)
+            .When(c => c.LoyaltyPoints.HasValue)
+            .WithMessage("Loyalty points cannot be negative.");
     }
 }

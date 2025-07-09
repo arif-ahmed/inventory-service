@@ -1,5 +1,6 @@
 ﻿using InventoryService.Domain.Entities.Sales;
 using InventoryService.Domain.Interfaces;
+using InventoryService.Domain.Interfaces.Pricing;
 using MediatR;
 
 namespace InventoryService.Application.Sales;
@@ -25,11 +26,15 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
     private readonly IProductRepository _productRepository;
     private readonly ISalesRepository _salesRepository;
     private readonly ISaleDetailsRepository _saleDetailsRepository;
-    public CreateSaleTransactionCommandHandler(IProductRepository productRepository, ISalesRepository salesRepository, ISaleDetailsRepository saleDetailsRepository)
+    private IDiscountPolicy _discountPolicy;
+    private IVATPolicy _vatPolicy;
+    public CreateSaleTransactionCommandHandler(IProductRepository productRepository, ISalesRepository salesRepository, ISaleDetailsRepository saleDetailsRepository, IDiscountPolicy discountPolicy, IVATPolicy vatPolicy)
     {
         _productRepository = productRepository;
         _salesRepository = salesRepository;
         _saleDetailsRepository = saleDetailsRepository;
+        _discountPolicy = discountPolicy;
+        _vatPolicy = vatPolicy;
     }
     public async Task Handle(CreateSaleTransactionCommand request, CancellationToken cancellationToken)
     {
@@ -41,6 +46,8 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
             PaidAmount = request.PaidAmount,
             DueAmount = request.DueAmount
         };
+
+        decimal subTotal = 0;
 
 
         foreach (var detail in request.SaleDetails)
@@ -68,12 +75,19 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
             };
 
             product.StockQty -= detail.Quantity; // Deduct stock
-            sale.TotalAmount += detail.Quantity * detail.Price; // Update total amount
+            subTotal += detail.Quantity * detail.Price; // Update total amount
 
             await _productRepository.UpdateAsync(product, cancellationToken); 
             await _saleDetailsRepository.AddAsync(saleDetail, cancellationToken);
         }
 
+        var discountAmount = _discountPolicy.ApplyDiscount(subTotal, 0, 10m); // Apply discount policy
+        subTotal -= discountAmount;
+        
+        var vatAmount = _vatPolicy.CalculateVAT(subTotal, 15m); // Apply VAT policy
+        subTotal += vatAmount; // Add VAT to total amount
+
+        sale.TotalAmount = subTotal; 
         sale.DueAmount = sale.TotalAmount - sale.PaidAmount; // Calculate due amount
         await _salesRepository.AddAsync(sale, cancellationToken);
 

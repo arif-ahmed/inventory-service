@@ -8,7 +8,7 @@ using Swashbuckle.AspNetCore.Annotations;
 
 namespace InventoryService.Api.Controllers;
 
-[Authorize]
+// [Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class CustomersController : ControllerBase
@@ -47,17 +47,18 @@ public class CustomersController : ControllerBase
     }
 
     [HttpPost]
-    public async Task<IActionResult> Post(CustomerCreateRequestModel payload)
+    public async Task<IActionResult> Post(CreateCustomerCommand command)
     {
-        _logger.LogInformation($"Create customer request: {payload}");
-        await _mediator.Send(new CreateCustomerCommand { FullName = payload.FullName, Email = payload.Email, Phone = payload.Phone });
+        _logger.LogInformation($"Create customer request: {command}");
+        await _mediator.Send(command);
         return Ok("Customer created successfully");
     }
 
-    [HttpPut]
-    public async Task<IActionResult> Put(int id, [FromBody] CustomerDto customer)
+    [HttpPut("{id}")]
+    public async Task<IActionResult> Put(int id, [FromBody] UpdateCustomerCommand customer)
     {
         _logger.LogInformation($"Update customer request: {customer}");
+        customer.CustomerId = id;
         var status = await _mediator.Send(new UpdateCustomerCommand { CustomerId = id, FullName = customer.FullName, Email = customer.Email, Phone = customer.Phone, });
         return Ok(status);
     }

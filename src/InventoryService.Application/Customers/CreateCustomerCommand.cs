@@ -1,4 +1,5 @@
-﻿using InventoryService.Domain.Entities.Customers;
+﻿using FluentValidation;
+using InventoryService.Domain.Entities.Customers;
 using InventoryService.Domain.Interfaces;
 using MediatR;
 
@@ -29,6 +30,17 @@ public class CreateCustomerCommandHandler : IRequestHandler<CreateCustomerComman
         };
 
         await _customerRepository.AddAsync(customer, cancellationToken);
+    }
+}
+
+public class CreateCustomerCommandValidator : AbstractValidator<CreateCustomerCommand>
+{
+    public CreateCustomerCommandValidator()
+    {
+        RuleFor(c => c.FullName).NotEmpty().WithMessage("Full name is required.");
+        RuleFor(c => c.Email).NotEmpty().EmailAddress().WithMessage("A valid email is required.");
+        RuleFor(c => c.Phone).NotEmpty().WithMessage("Phone number is required.");
+        RuleFor(c => c.LoyaltyPoints).GreaterThanOrEqualTo(0).WithMessage("Loyalty points cannot be negative.");
     }
 }
 

@@ -7,7 +7,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace InventoryService.Api.Controllers;
 
-[Authorize]
+// [Authorize]
 [Route("api/[controller]")]
 [ApiController]
 public class SalesController : ControllerBase
