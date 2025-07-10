@@ -64,11 +64,11 @@ public class ProductsController : ControllerBase
     [SwaggerResponse(StatusCodes.Status200OK, "Products retrieved successfully", typeof(IEnumerable<ProductDto>))]
     [SwaggerResponse(StatusCodes.Status400BadRequest, "Invalid search parameters")]
     [SwaggerResponse(StatusCodes.Status500InternalServerError, "An error occurred while processing the request")]
-    public async Task<IActionResult> GetProducts([FromQuery] string searchText, [FromQuery] int offset = 1, [FromQuery] int page = 10)
+    public async Task<IActionResult> GetProducts([FromQuery] string? searchText = null, [FromQuery] int offset = 1, [FromQuery] int page = 10)
     {
         _logger.LogInformation("Fetching list of products");
         var products = await _mediator.Send(new GetProductsQuery { SearchTerm = searchText, PageNumber = offset, PageSize = page });
-        return Ok(products);
+        return Ok(new { Items = products.Item1, TotalCount = products.Item2 });
     }
 
     [HttpPost]
