@@ -39,6 +39,7 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
     }
     public async Task Handle(CreateSaleTransactionCommand request, CancellationToken cancellationToken)
     {
+        // 1. Create the Sale and save it to generate SaleId
         var sale = new Sale
         {
             SaleDate = request.SaleDate,
@@ -48,25 +49,31 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
             DueAmount = request.DueAmount
         };
 
+        await _salesRepository.AddAsync(sale, cancellationToken); // SaleId now available if using EF or similar
+
         decimal subTotal = 0;
 
-
+        // 2. Process each SaleDetail (check product, update stock, add sale detail)
         foreach (var detail in request.SaleDetails)
         {
-            // Check if product exists
+            // Check product exists
             var product = await _productRepository.GetByIdAsync(detail.ProductId, cancellationToken);
-
             if (product == null)
             {
                 throw new ArgumentException($"Product with ID {detail.ProductId} does not exist.");
             }
 
-            // Check if product has sufficient stock
+            // Check stock
             if (product.StockQty < detail.Quantity)
             {
                 throw new InvalidOperationException($"Insufficient stock for product {product.Name}. Available: {product.StockQty}, Requested: {detail.Quantity}");
             }
 
+            // Deduct stock and update product
+            product.StockQty -= detail.Quantity;
+            await _productRepository.UpdateAsync(product, cancellationToken);
+
+            // Create sale detail (use valid SaleId)
             var saleDetail = new SaleDetails
             {
                 SaleId = sale.SaleId,
@@ -75,26 +82,27 @@ public class CreateSaleTransactionCommandHandler : IRequestHandler<CreateSaleTra
                 Price = detail.Price
             };
 
-            product.StockQty -= detail.Quantity; // Deduct stock
-            subTotal += detail.Quantity * detail.Price; // Update total amount
-
-            await _productRepository.UpdateAsync(product, cancellationToken); 
+            subTotal += detail.Quantity * detail.Price;
             await _saleDetailsRepository.AddAsync(saleDetail, cancellationToken);
         }
 
-        var discountAmount = _discountPolicy.ApplyDiscount(subTotal, 0, 10m); // Apply discount policy
+        // 3. Apply discount and VAT
+        var discountAmount = _discountPolicy.ApplyDiscount(subTotal, 0, 10m); // adjust as needed
         subTotal -= discountAmount;
-        
-        var vatAmount = _vatPolicy.CalculateVAT(subTotal, 15m); // Apply VAT policy
-        subTotal += vatAmount; // Add VAT to total amount
 
-        sale.TotalAmount = subTotal; 
-        sale.DueAmount = sale.TotalAmount - sale.PaidAmount; // Calculate due amount
-        await _salesRepository.AddAsync(sale, cancellationToken);
+        var vatAmount = _vatPolicy.CalculateVAT(subTotal, 15m); // adjust as needed
+        subTotal += vatAmount;
 
-        // uow save changes
-        await Task.Delay(3000);
+        // 4. Update sale totals and save
+        sale.TotalAmount = subTotal;
+        sale.DueAmount = sale.TotalAmount - sale.PaidAmount;
+
+        await _salesRepository.UpdateAsync(sale, cancellationToken);
+
+        // (Optional) Add a small delay for demonstration if you wish, otherwise remove:
+        // await Task.Delay(3000);
     }
+
 }
 
 class CreateSaleTransactionCommandValidator : AbstractValidator<CreateSaleTransactionCommand>

@@ -39,7 +39,7 @@ public class GetProductsQueryHandler : IRequestHandler<GetProductsQuery, (IEnume
 
         // Pagination
         if (request.PageNumber > 0)
-            query = query.Skip(request.PageNumber);
+            query = query.Skip(request.PageNumber - 1);
 
         if (request.PageSize > 0)
             query = query.Take(request.PageSize);
